@@ -4,12 +4,17 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+import os
+import json
+
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Firebase setup
-cred = credentials.Certificate("serviceAccountKey.json")
+# Firebase setup using Railway Environment Variable
+firebase_key = json.loads(os.environ["FIREBASE_KEY"])
+
+cred = credentials.Certificate(firebase_key)
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -17,12 +22,15 @@ db = firestore.client()
 # ROOT ROUTE
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"message": "CRUD API is running", "endpoints": {
-        "create": "POST /users",
-        "read": "GET /users",
-        "update": "PUT /users/<id>",
-        "delete": "DELETE /users/<id>"
-    }})
+    return jsonify({
+        "message": "CRUD API is running",
+        "endpoints": {
+            "create": "POST /users",
+            "read": "GET /users",
+            "update": "PUT /users/<id>",
+            "delete": "DELETE /users/<id>"
+        }
+    })
 
 # CREATE
 @app.route('/users', methods=['POST'])
